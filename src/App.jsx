@@ -4,10 +4,12 @@ import './App.css'
 function App() {
   const [task, setTask] = useState("")
   const [tasks, setTasks] = useState([])
+  
+  const API_URL = "https://todo-backend-j7it.onrender.com"
 
-  // Backend se todos lana
+  // Live backend se todos lana
   useEffect(() => {
-    fetch('http://localhost:3000/todos')
+    fetch(`${API_URL}/todos`)
       .then(res => res.json())
       .then(data => setTasks(data))
       .catch(err => console.log("Backend error", err))
@@ -16,7 +18,7 @@ function App() {
   const addTask = async () => {
     if (task.trim() === "") return
     
-    const res = await fetch('http://localhost:3000/todos', {
+    const res = await fetch(`${API_URL}/todos`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text: task })
@@ -27,7 +29,7 @@ function App() {
   }
 
   const deleteTask = async (id) => {
-    await fetch(`http://localhost:3000/todos/${id}`, {
+    await fetch(`${API_URL}/todos/${id}`, {
       method: 'DELETE'
     })
     setTasks(tasks.filter(t => t.id !== id))
@@ -35,7 +37,7 @@ function App() {
 
   return (
     <div className="container">
-      <h2>My To-Do - Day 7 (Full Stack)</h2>
+      <h2>My To-Do - Day 8 (Full Stack Live)</h2>
       <div className="input-box">
         <input
           type="text"
@@ -55,7 +57,7 @@ function App() {
           </li>
         ))}
       </ul>
-      <p className="footer">Total: {tasks.length} tasks | Full Stack by Amit - Day 7</p>
+      <p className="footer">Total: {tasks.length} tasks | Live Full Stack by Amit - Day 8</p>
     </div>
   )
 }
