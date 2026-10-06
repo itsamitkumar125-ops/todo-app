@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react'
 import './App.css'
 
-// Ye line sabse important hai - Render ka URL yaha se aayega
-const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 function App() {
   const [todos, setTodos] = useState([])
   const [task, setTask] = useState("")
 
-  // Backend se todos lana
   const fetchTodos = async () => {
     try {
       const res = await fetch(`${API}/todos`);
@@ -23,27 +21,29 @@ function App() {
     fetchTodos()
   }, [])
 
-  // Add karna
   const addTodo = async () => {
     if (!task.trim()) return;
     try {
       const res = await fetch(`${API}/todos`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: task, title: task })
+        body: JSON.stringify({ text: task })
       });
       const newTodo = await res.json();
-      setTodos([...todos, newTodo]);
+      setTodos(prev => [...prev, newTodo]);
       setTask("");
     } catch (err) {
-      console.log(err)
+      console.log("Add error:", err)
     }
   }
 
-  // Delete karna
   const deleteTodo = async (id) => {
-    await fetch(`${API}/todos/${id}`, { method: "DELETE" });
-    setTodos(todos.filter(t => t._id !== id));
+    try {
+      await fetch(`${API}/todos/${id}`, { method: "DELETE" });
+      setTodos(prev => prev.filter(t => t._id !== id));
+    } catch (err) {
+      console.log("Delete error:", err)
+    }
   }
 
   return (
