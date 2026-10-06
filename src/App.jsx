@@ -1,65 +1,60 @@
-import { useState, useEffect } from 'react'
-import './App.css'
+import { useState, useEffect } from 'react';
 
 function App() {
-  const [task, setTask] = useState("")
-  const [tasks, setTasks] = useState([])
-  
-  const API_URL = "https://todo-backend-j7it.onrender.com"
+  const [todos, setTodos] = useState([]);
+  const [text, setText] = useState('');
 
-  // Live backend se todos lana
-  useEffect(() => {
-    fetch(`${API_URL}/todos`)
-      .then(res => res.json())
-      .then(data => setTasks(data))
-      .catch(err => console.log("Backend error", err))
-  }, [])
+  const getTodos = async () => {
+    const res = await fetch('http://localhost:3000/todos');
+    const data = await res.json();
+    setTodos(data);
+  };
 
-  const addTask = async () => {
-    if (task.trim() === "") return
-    
-    const res = await fetch(`${API_URL}/todos`, {
+  useEffect(() => { getTodos(); }, []);
+
+  const addTodo = async () => {
+    if (!text.trim()) return;
+    await fetch('http://localhost:3000/todos', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: task })
-    })
-    const newTask = await res.json()
-    setTasks([...tasks, newTask])
-    setTask("")
-  }
+      body: JSON.stringify({ text }),
+    });
+    setText('');
+    getTodos();
+  };
 
-  const deleteTask = async (id) => {
-    await fetch(`${API_URL}/todos/${id}`, {
-      method: 'DELETE'
-    })
-    setTasks(tasks.filter(t => t.id !== id))
-  }
+  const deleteTodo = async (id) => {
+    await fetch(`http://localhost:3000/todos/${id}`, { method: 'DELETE' });
+    getTodos();
+  };
 
   return (
-    <div className="container">
-      <h2>My To-Do - Day 8 (Full Stack Live)</h2>
-      <div className="input-box">
-        <input
-          type="text"
-          value={task}
-          onChange={(e) => setTask(e.target.value)}
-          placeholder="Naya task likh..."
-          onKeyDown={(e) => e.key === 'Enter' && addTask()}
-        />
-        <button onClick={addTask}>Add</button>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', display: 'flex', justifyContent: 'center', paddingTop: '60px' }}>
+      <div style={{ background: 'white', width: '450px', borderRadius: '16px', padding: '30px', boxShadow: '0 20px 40px rgba(0,0,0,0.2)', height: 'fit-content' }}>
+        <h1 style={{ textAlign: 'center', color: '#333', marginBottom: '20px' }}>✨ My Todo App</h1>
+        
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+          <input 
+            value={text} 
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Naya task likho..."
+            style={{ flex: 1, padding: '12px', borderRadius: '8px', border: '2px solid #e0e0e0', outline: 'none' }}
+            onKeyDown={(e) => e.key === 'Enter' && addTodo()}
+          />
+          <button onClick={addTodo} style={{ padding: '12px 20px', background: '#667eea', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>Add</button>
+        </div>
+
+        <ul style={{ listStyle: 'none', padding: 0 }}>
+          {todos.map((t) => (
+            <li key={t._id} style={{ display: 'flex', justifyContent: 'space-between', background: '#f7f7ff', padding: '12px 15px', borderRadius: '8px', marginBottom: '10px', borderLeft: '4px solid #667eea' }}>
+              <span>{t.text}</span>
+              <button onClick={() => deleteTodo(t._id)} style={{ background: '#ff6b6b', color: 'white', border: 'none', borderRadius: '5px', padding: '4px 10px', cursor: 'pointer' }}>X</button>
+            </li>
+          ))}
+        </ul>
+        <p style={{ textAlign: 'center', marginTop: '15px', color: '#888', fontSize: '12px' }}>MongoDB Connected ✅ - {todos.length} tasks</p>
       </div>
-
-      <ul>
-        {tasks.map((t) => (
-          <li key={t.id}>
-            {t.text}
-            <button className="del-btn" onClick={() => deleteTask(t.id)}>❌</button>
-          </li>
-        ))}
-      </ul>
-      <p className="footer">Total: {tasks.length} tasks | Live Full Stack by Amit - Day 8</p>
     </div>
-  )
+  );
 }
-
-export default App
+export default App;
